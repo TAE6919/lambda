@@ -17,6 +17,7 @@ exports.handler = async (event, context, callback) => {
     const resizedImage = await sharp(s3Object.Body) // 리사이징
       .resize(200, 200, { fit: 'inside' })
       .toFormat(requiredFormat)
+      .withMetadata()
       .toBuffer();
     await s3
       .putObject({
