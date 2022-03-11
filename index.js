@@ -22,7 +22,7 @@ exports.handler = async (event, context, callback) => {
     if (folder == 'formLink') {
       console.log('formLink 리사이징');
       resizedImage = await sharp(s3Object.Body) // 리사이징
-        .resize(800)
+        .resize(500, 500)
         .toFormat(requiredFormat)
         .withMetadata()
         .toBuffer();
