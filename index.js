@@ -9,16 +9,25 @@ exports.handler = async (event, context, callback) => {
   const Key = decodeURIComponent(
     event.Records[0].s3.object.key.replace(/\+/g, ' ')
   );
-  console.log(Bucket, Key);
   const filename = Key.split('/')[Key.split('/').length - 1];
   const ext = Key.split('.')[Key.split('.').length - 1];
   const requiredFormat = ext === 'jpg' ? 'jpeg' : ext; // sharp에서는 jpg 대신 jpeg 사용합니다.
-  console.log('name', filename, 'ext', ext);
+
+  const [folder] = Key.split('/');
 
   try {
     const s3Object = await s3.getObject({ Bucket, Key }).promise(); // 버퍼로 가져오기
-    console.log('original', s3Object.Body.length);
-    const resizedImage = await sharp(s3Object.Body) // 리사이징
+
+    let resizedImage;
+    if (folder == 'formLink') {
+      resizedImage = await sharp(s3Object.Body) // 리사이징
+        .resize(800, 400)
+        .toFormat(requiredFormat)
+        .withMetadata()
+        .toBuffer();
+    }
+
+    resizedImage = await sharp(s3Object.Body) // 리사이징
       .resize(200)
       .toFormat(requiredFormat)
       .withMetadata()
@@ -31,7 +40,7 @@ exports.handler = async (event, context, callback) => {
         Body: resizedImage,
       })
       .promise();
-    console.log('put', resizedImage.length);
+
     return callback(null, `thumb/${filename}`);
   } catch (error) {
     console.error(error);
