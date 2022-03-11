@@ -20,18 +20,21 @@ exports.handler = async (event, context, callback) => {
 
     let resizedImage;
     if (folder == 'formLink') {
+      console.log('formLink 리사이징');
       resizedImage = await sharp(s3Object.Body) // 리사이징
         .resize(800, 400)
         .toFormat(requiredFormat)
         .withMetadata()
         .toBuffer();
+    } else {
+      console.log('이미지 리사이징');
+      resizedImage = await sharp(s3Object.Body) // 리사이징
+        .resize(200)
+        .toFormat(requiredFormat)
+        .withMetadata()
+        .toBuffer();
     }
 
-    resizedImage = await sharp(s3Object.Body) // 리사이징
-      .resize(200)
-      .toFormat(requiredFormat)
-      .withMetadata()
-      .toBuffer();
     await s3
       .putObject({
         // thumb 폴더에 저장
